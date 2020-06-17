@@ -11,8 +11,8 @@ defmodule OpenExchangeRates.Updater do
 
   @doc false
   def start do
-    load_data_from_disk
-    check_for_update
+    load_data_from_disk()
+    check_for_update()
     :ok
   end
 
@@ -20,9 +20,9 @@ defmodule OpenExchangeRates.Updater do
   def check_for_update do
     cache_time = Application.get_env(:open_exchange_rates, :cache_time_in_minutes, 1440) * 60
 
-    if OpenExchangeRates.Cache.cache_age >= cache_time, do: update
+    if OpenExchangeRates.Cache.cache_age >= cache_time, do: update()
     Process.sleep(@update_interval_in_seconds * 1000)
-    check_for_update
+    check_for_update()
   end
 
   def load_data_from_disk do
@@ -39,7 +39,7 @@ defmodule OpenExchangeRates.Updater do
   end
 
   def load_data_from_disk! do
-    case load_data_from_disk do
+    case load_data_from_disk() do
       :ok -> :ok
       {:error, message} -> raise(message)
     end

@@ -9,7 +9,7 @@ defmodule OpenExchangeRates do
   def start(_type, _args) do
     import Supervisor.Spec, warn: false
 
-    configuration_status = check_configuration
+    configuration_status = check_configuration()
     children = [worker(OpenExchangeRates.Cache, [configuration_status])]
 
     opts = [strategy: :one_for_one, name: OpenExchangeRates.Supervisor]
@@ -22,7 +22,7 @@ defmodule OpenExchangeRates do
   ## example
 
       iex> OpenExchangeRates.available_currencies |> Enum.take(10)
-      ["AWG", "NAD", "INR", "LAK", "BOB", "MOP", "QAR", "SDG", "TMT", "BRL"]
+      ["NAD", "AWG", "INR", "LAK", "QAR", "MOP", "BOB", "SDG", "TMT", "BRL"]
 
   """
   @spec available_currencies() :: [String.t]
@@ -124,7 +124,7 @@ defmodule OpenExchangeRates do
   # Examples
 
       iex> OpenExchangeRates.convert_cents_and_format(1234567, :EUR, :CAD)
-      {:ok, "C$18,026.07"}
+      {:ok, "$18,026.07"}
 
       iex> OpenExchangeRates.convert_cents_and_format(1234567, :EUR, :USD)
       {:ok, "$13,687"}
@@ -133,7 +133,7 @@ defmodule OpenExchangeRates do
       {:ok, "€11.135,79"}
 
       iex> OpenExchangeRates.convert_cents_and_format(1234567, :EUR, :NOK)
-      {:ok, "116.495,78NOK"}
+      {:ok, "116.495,78kr"}
   """
   @spec convert_cents_and_format(Integer.t, (Atom.t | String.t), (Atom.t | String.t)) :: String.t
   def convert_cents_and_format(value, from, to) when is_integer(value) do
@@ -166,7 +166,7 @@ defmodule OpenExchangeRates do
   # Examples
 
       iex> OpenExchangeRates.convert_and_format(1234, :EUR, :AUD)
-      {:ok, "A$1,795.10"}
+      {:ok, "$1,795.10"}
   """
   @spec convert_and_format((Integer.t | Float.t), (Atom.t | String.t), (Atom.t | String.t)) :: String.t
   def convert_and_format(value, from, to), do: convert_cents_and_format((Kernel.round(value * 100)), from, to)
@@ -205,7 +205,7 @@ defmodule OpenExchangeRates do
   defp check_configuration do
     cond do
       Application.get_env(:open_exchange_rates, :auto_update) == false -> :disable_updater
-      Application.get_env(:open_exchange_rates, :app_id) == nil -> config_error_message; :missing_key
+      Application.get_env(:open_exchange_rates, :app_id) == nil -> config_error_message(); :missing_key
       true -> :ok
     end
   end

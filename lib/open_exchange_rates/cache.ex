@@ -38,7 +38,7 @@ defmodule OpenExchangeRates.Cache do
 
   @doc false
   @spec currencies() :: [String.t]
-  def currencies, do: OpenExchangeRates.Cache |> :ets.match({:"$1", :"_"}) |> List.flatten
+  def currencies, do: OpenExchangeRates.Cache |> :ets.match({:"$1", :_}) |> List.flatten
 
   @doc false
   @spec update!([{String.t, Float.t}], Integer.t) :: :ok
