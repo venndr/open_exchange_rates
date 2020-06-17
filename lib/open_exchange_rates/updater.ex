@@ -32,6 +32,7 @@ defmodule OpenExchangeRates.Updater do
       |> File.read!
       |> Poison.decode!
       |> update_cache!(cached_at)
+
       :ok
     else
       {:error, "could not find #{cache_file()} which you defined in your config"}
@@ -54,7 +55,7 @@ defmodule OpenExchangeRates.Updater do
   defp update do
     Logger.info "OpenExchangeRates Updating Rates..."
     case OpenExchangeRates.Client.get_latest do
-      {:ok, data} -> data |> write_to_disk! |> update_cache!
+      {:ok, data} -> data |> write_to_disk! |> update_cache!()
       {:error, message} -> {:error, message}
     end
   end
