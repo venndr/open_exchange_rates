@@ -30,7 +30,7 @@ defmodule OpenExchangeRates.Updater do
       cached_at = File.lstat!(cache_file(), [time: :posix]).mtime
       cache_file()
       |> File.read!
-      |> Poison.decode!
+      |> Jason.decode!(floats: :decimals)
       |> update_cache!(cached_at)
 
       :ok
@@ -47,7 +47,7 @@ defmodule OpenExchangeRates.Updater do
   end
 
   defp write_to_disk!(data) do
-    json = Poison.encode!(data)
+    json = Jason.encode!(data)
     File.write!(cache_file(), json)
     data
   end
