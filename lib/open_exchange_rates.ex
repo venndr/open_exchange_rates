@@ -6,11 +6,18 @@ defmodule OpenExchangeRates do
   require Logger
 
   @doc false
-  def start(_type, _args) do
+  def start(_type, args) do
     import Supervisor.Spec, warn: false
 
     configuration_status = check_configuration()
-    children = [worker(OpenExchangeRates.Cache, [configuration_status])]
+
+    children = case Keyword.get(args, :cache) do
+      [module: module, args: cache_args] ->
+        [worker(module, [configuration_status | cache_args])]
+
+      _ ->
+        [worker(OpenExchangeRates.Cache, [configuration_status])]
+    end
 
     opts = [strategy: :one_for_one, name: OpenExchangeRates.Supervisor]
     Supervisor.start_link(children, opts)

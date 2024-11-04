@@ -2,8 +2,8 @@ defmodule OpenExchangeRates.Cache do
   @moduledoc """
   This module takes care of caching the currency rates and is for internal use only
   """
-  use GenServer
 
+  use GenServer
 
   @doc false
   def start_link(configuration_status) do
