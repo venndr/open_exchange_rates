@@ -54,7 +54,10 @@ defmodule OpenExchangeRates.Updater do
 
   defp update do
     Logger.info "OpenExchangeRates Updating Rates..."
-    case OpenExchangeRates.Client.get_latest do
+
+    oex_client = Application.get_env(:open_exchange_rates, :client, OpenExchangeRates.Client)
+
+    case oex_client.get_latest do
       {:ok, data} -> data |> write_to_disk! |> update_cache!()
       {:error, message} -> {:error, message}
     end
