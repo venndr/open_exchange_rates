@@ -27,7 +27,7 @@ defmodule OpenExchangeRates.Cache do
   end
 
   @doc false
-  @spec rate_for_currency((String.t| Atom.t)) :: {:ok, Float.t} | {:error, String.t}
+  @spec rate_for_currency((String.t| Atom.t)) :: {:ok, Decimal.t} | {:error, String.t}
   def rate_for_currency(currency) when is_atom(currency), do: rate_for_currency(Atom.to_string(currency))
   def rate_for_currency(currency) when is_binary(currency) do
     case OpenExchangeRates.Cache |> :ets.lookup(String.upcase(currency)) do
@@ -41,7 +41,7 @@ defmodule OpenExchangeRates.Cache do
   def currencies, do: OpenExchangeRates.Cache |> :ets.match({:"$1", :_}) |> List.flatten
 
   @doc false
-  @spec update!([{String.t, Float.t}], Integer.t) :: :ok
+  @spec update!([{String.t, Decimal.t}], Integer.t) :: :ok
   def update!(rates, cached_at) do
     GenServer.call(__MODULE__, {:update!, rates, cached_at})
   end

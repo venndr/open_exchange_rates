@@ -20,14 +20,15 @@ defmodule OpenExchangeRates.Mixfile do
   def application do
     [
       mod: {OpenExchangeRates, []},
-      applications: [:logger, :httpoison, :currency_formatter]
+      applications: [:logger, :httpoison, :currency_formatter, :decimal, :jason]
     ]
   end
 
   defp deps do
     [
       {:httpoison, "~> 1.6"},
-      {:poison, "~> 3.1"},
+      {:decimal, "~> 2.1.1"},
+      {:jason, "~> 1.4"},
       {:exvcr, "~> 0.11", only: [:dev, :test]},
       {:credo, "~> 1.4", only: [:dev, :test]},
       {:mix_test_watch, "~> 1.0", only: [:dev, :test]},

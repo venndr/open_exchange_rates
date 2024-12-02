@@ -21,8 +21,8 @@ defmodule OpenExchangeRates do
 
   ## example
 
-      iex> OpenExchangeRates.available_currencies |> Enum.take(10)
-      ["NAD", "AWG", "INR", "LAK", "QAR", "MOP", "BOB", "SDG", "TMT", "BRL"]
+      iex> OpenExchangeRates.available_currencies |> Enum.sort() |> Enum.take(10)
+      ["AED", "AFN", "ALL", "AMD", "ANG", "AOA", "ARS", "AUD", "AWG", "AZN"]
 
   """
   @spec available_currencies() :: [String.t]
@@ -43,20 +43,18 @@ defmodule OpenExchangeRates do
 
   ## example
 
-      iex> OpenExchangeRates.convert(100.00, :EUR, :GBP)
-      {:ok, 84.81186252771619}
+      iex> OpenExchangeRates.convert(Decimal.new("100.00"), :EUR, :GBP)
+      {:ok, Decimal.new("84.81186252771618625277161866")}
 
   """
-  @spec convert(Integer.t, (String.t | Atom.t), (String.t | Atom.t)) :: {:ok, Float.t} | {:error, String.t}
-  def convert(value, from, to) when is_integer(value), do: convert((value/1.0), from, to)
-  @spec convert(Float.t, (String.t | Atom.t), (String.t | Atom.t)) :: {:ok, Float.t} | {:error, String.t}
-  def convert(value, from, to) when is_float(value) do
+  @spec convert(Integer.t | Decimal.t, (String.t | Atom.t), (String.t | Atom.t)) :: {:ok, Decimal.t} | {:error, String.t}
+  def convert(value, from, to) do
     with \
       {:ok, rate_from} <- OpenExchangeRates.Cache.rate_for_currency(from),
       {:ok, rate_to} <- OpenExchangeRates.Cache.rate_for_currency(to) \
     do
-      rate_usd = value / rate_from
-      converted = rate_usd * rate_to
+      rate_usd = Decimal.div(value, rate_from)
+      converted = Decimal.mult(rate_usd, rate_to)
       {:ok, converted}
     else
       error -> error
@@ -69,16 +67,14 @@ defmodule OpenExchangeRates do
   Will either return the result or raise when there was an error
   ## examples
 
-      iex> OpenExchangeRates.convert!(100.00, :EUR, :GBP)
-      84.81186252771619
+      iex> OpenExchangeRates.convert!(Decimal.new("100.00"), :EUR, :GBP)
+      Decimal.new("84.81186252771618625277161866")
 
       iex> OpenExchangeRates.convert!(100, :EUR, :GBP)
-      84.81186252771619
+      Decimal.new("84.81186252771618625277161866")
   """
-  @spec convert!(Integer.t, (String.t | Atom.t), (String.t | Atom.t)) :: {:ok, Float.t} | {:error, String.t}
-  def convert!(value, from, to) when is_integer(value), do: convert!((value/1.0), from, to)
-  @spec convert!(Float.t, (String.t | Atom.t), (String.t | Atom.t)) :: {:ok, Float.t} | {:error, String.t}
-  def convert!(value, from, to) when is_float(value) do
+  @spec convert!(Integer.t | Decimal.t, (String.t | Atom.t), (String.t | Atom.t)) :: {:ok, Decimal.t} | {:error, String.t}
+  def convert!(value, from, to) do
     case convert(value, from, to) do
       {:ok, result} -> result
       {:error, message} -> raise(message)
@@ -95,9 +91,9 @@ defmodule OpenExchangeRates do
 
   """
   @spec convert_cents(Integer.t, (String.t | Atom.t), (String.t | Atom.t)) :: {:ok, Integer.t} | {:error, String.t}
-  def convert_cents(value, from, to) when is_integer(value) do
-    case convert(value/100, from, to) do
-      {:ok, result} -> {:ok, Kernel.round(result * 100)}
+  def convert_cents(value, from, to) do
+    case convert(divide_by_100(value), from, to) do
+      {:ok, result} -> {:ok, result |> Decimal.mult(100) |> Decimal.round() |> Decimal.to_integer()}
       error -> error
     end
   end
@@ -136,7 +132,7 @@ defmodule OpenExchangeRates do
       {:ok, "116.495,78kr"}
   """
   @spec convert_cents_and_format(Integer.t, (Atom.t | String.t), (Atom.t | String.t)) :: String.t
-  def convert_cents_and_format(value, from, to) when is_integer(value) do
+  def convert_cents_and_format(value, from, to) do
     case convert_cents(value, from, to) do
       {:ok, result} -> {:ok, CurrencyFormatter.format(result, to)}
       error -> error
@@ -168,8 +164,8 @@ defmodule OpenExchangeRates do
       iex> OpenExchangeRates.convert_and_format(1234, :EUR, :AUD)
       {:ok, "$1,795.10"}
   """
-  @spec convert_and_format((Integer.t | Float.t), (Atom.t | String.t), (Atom.t | String.t)) :: String.t
-  def convert_and_format(value, from, to), do: convert_cents_and_format((Kernel.round(value * 100)), from, to)
+  @spec convert_and_format((Integer.t | Decimal.t), (Atom.t | String.t), (Atom.t | String.t)) :: String.t
+  def convert_and_format(value, from, to), do: convert_cents_and_format(Decimal.mult(value, 100), from, to)
 
 
   @doc """
@@ -181,7 +177,7 @@ defmodule OpenExchangeRates do
       iex> OpenExchangeRates.convert_and_format!(1234567, :EUR, :USD)
       "$1,368,699.56"
   """
-  @spec convert_and_format!((Integer.t | Float.t), (Atom.t | String.t), (Atom.t | String.t)) :: String.t
+  @spec convert_and_format!((Integer.t | Decimal.t), (Atom.t | String.t), (Atom.t | String.t)) :: String.t
   def convert_and_format!(value, from, to) when is_integer(value) do
     case convert_and_format(value, from, to) do
       {:ok, result} -> result
@@ -195,12 +191,20 @@ defmodule OpenExchangeRates do
   ## Example
 
       iex> OpenExchangeRates.conversion_rate(:EUR, :GBP)
-      {:ok, 0.8481186252771619}
+      {:ok, Decimal.new("0.8481186252771618625277161866")}
 
   """
-  @spec conversion_rate((String.t| Atom.t), (String.t| Atom.t)) :: {:ok, Float.t} | {:error, String.t}
+  @spec conversion_rate((String.t| Atom.t), (String.t| Atom.t)) :: {:ok, Decimal.t} | {:error, String.t}
   def conversion_rate(from, to) when is_binary(from) and is_binary(to), do: conversion_rate(String.to_atom(from), String.to_atom(to))
-  def conversion_rate(from, to), do: convert(1.0, from, to)
+  def conversion_rate(from, to), do: convert(Decimal.new("1"), from, to)
+
+  defp divide_by_100(int) when is_integer(int) and int >= 0,
+    do: Decimal.new(1, int, -2)
+
+  defp divide_by_100(int) when is_integer(int) and int >= 0,
+    do: Decimal.new(-1, abs(int), -2)
+
+  defp divide_by_100(%Decimal{} = dec), do: Decimal.div(dec, 100)
 
   defp check_configuration do
     cond do

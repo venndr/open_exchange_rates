@@ -11,27 +11,27 @@ defmodule OpenExchangeRatesTest do
   end
 
   test "get conversion rate between two currencies" do
-    {:ok, 0.8481186252771619} = OpenExchangeRates.conversion_rate(:EUR, :GBP)
+    assert {:ok, Decimal.new("0.8481186252771618625277161866")} == OpenExchangeRates.conversion_rate(:EUR, :GBP)
   end
 
   test "convert usd to eur" do
     assert  {:ok, 90} = OpenExchangeRates.convert_cents(100, :USD, :EUR)
-    assert  {:ok,  0.902} = OpenExchangeRates.convert(1.0, :USD, :EUR)
+    assert  {:ok, Decimal.new("0.9020")} == OpenExchangeRates.convert(Decimal.new("1.0"), :USD, :EUR)
   end
 
   test "convert eur to usd" do
     assert  {:ok, 111} = OpenExchangeRates.convert_cents(100, :EUR, :USD)
-    assert  {:ok, 1.1086474501108647} = OpenExchangeRates.convert(1.0, :EUR, :USD)
+    assert  {:ok, Decimal.new("1.108647450110864745011086475")} == OpenExchangeRates.convert(Decimal.new("1.0"), :EUR, :USD)
   end
 
   test "convert eur to gbp" do
     assert  {:ok, 85} = OpenExchangeRates.convert_cents(100, :EUR, :GBP)
-    assert   {:ok, 0.8481186252771619} = OpenExchangeRates.convert(1.0, :EUR, :GBP)
+    assert  {:ok, Decimal.new("0.8481186252771618625277161866")} == OpenExchangeRates.convert(Decimal.new("1.0"), :EUR, :GBP)
   end
 
   test "convert gbp to eur" do
     assert  {:ok, 118} = OpenExchangeRates.convert_cents(100, :GBP, :EUR)
-    assert  {:ok, 1.1790803434757773} = OpenExchangeRates.convert(1.00, :GBP, :EUR)
+    assert  {:ok, Decimal.new("1.179080343475777219174303891")} == OpenExchangeRates.convert(Decimal.new("1.0"), :GBP, :EUR)
   end
 
 
@@ -39,13 +39,13 @@ defmodule OpenExchangeRatesTest do
     assert  {:ok, 118} = OpenExchangeRates.convert_cents(100, "GBP", "EUR")
     assert  {:ok, 118} = OpenExchangeRates.convert_cents(100, "gbp", "eur")
     assert  {:ok, 118} = OpenExchangeRates.convert_cents(100, :gbp, :eur)
-    assert  {:ok, 1.1790803434757773} = OpenExchangeRates.convert(1, "GBP", "EUR")
-    assert  {:ok, 1.1790803434757773} = OpenExchangeRates.convert(1.0, "GBP", "EUR")
-    assert  {:ok, 1.1790803434757773} = OpenExchangeRates.convert(1.0, "gbp", "eur")
-    assert  {:ok, 1.1790803434757773} = OpenExchangeRates.convert(1.0, :gbp, :eur)
-    assert  {:ok, 1.1790803434757773} = OpenExchangeRates.conversion_rate(:gbp, :eur)
-    assert  {:ok, 1.1790803434757773} = OpenExchangeRates.conversion_rate("gbp", "eur")
-    assert  {:ok, 1.1790803434757773} = OpenExchangeRates.conversion_rate("GBP", "EUR")
+    assert  {:ok, Decimal.new("1.179080343475777219174303891")} == OpenExchangeRates.convert(1, "GBP", "EUR")
+    assert  {:ok, Decimal.new("1.179080343475777219174303891")} == OpenExchangeRates.convert(Decimal.new("1.0"), "GBP", "EUR")
+    assert  {:ok, Decimal.new("1.179080343475777219174303891")} == OpenExchangeRates.convert(Decimal.new("1.0"), "gbp", "eur")
+    assert  {:ok, Decimal.new("1.179080343475777219174303891")} == OpenExchangeRates.convert(Decimal.new("1.0"), :gbp, :eur)
+    assert  {:ok, Decimal.new("1.179080343475777219174303891")} == OpenExchangeRates.conversion_rate(:gbp, :eur)
+    assert  {:ok, Decimal.new("1.179080343475777219174303891")} == OpenExchangeRates.conversion_rate("gbp", "eur")
+    assert  {:ok, Decimal.new("1.179080343475777219174303891")} == OpenExchangeRates.conversion_rate("GBP", "EUR")
   end
 
   test "it should return the cache age" do
