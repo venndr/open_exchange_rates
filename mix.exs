@@ -27,7 +27,7 @@ defmodule OpenExchangeRates.Mixfile do
       {:mix_test_watch, "~> 1.0", only: [:dev, :test]},
       {:ex_doc, "~> 0.22", only: [:dev, :test]},
       {:excoveralls, "~> 0.13", only: :test},
-      {:currency_formatter, "~> 0.8"}
+      {:currency_formatter, github: "venndr/currency_formatter", ref: "2f8f0f9e8d73c958780c872cc1e03f1c78a88a88"}
     ]
   end
 
