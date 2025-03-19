@@ -201,7 +201,7 @@ defmodule OpenExchangeRates do
   defp divide_by_100(int) when is_integer(int) and int >= 0,
     do: Decimal.new(1, int, -2)
 
-  defp divide_by_100(int) when is_integer(int) and int >= 0,
+  defp divide_by_100(int) when is_integer(int) and int < 0,
     do: Decimal.new(-1, abs(int), -2)
 
   defp divide_by_100(%Decimal{} = dec), do: Decimal.div(dec, 100)
