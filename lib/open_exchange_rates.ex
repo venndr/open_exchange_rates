@@ -92,7 +92,7 @@ defmodule OpenExchangeRates do
   """
   @spec convert_cents(Integer.t, (String.t | Atom.t), (String.t | Atom.t)) :: {:ok, Integer.t} | {:error, String.t}
   def convert_cents(value, from, to) do
-    case convert(divide_by_100(value), from, to) do
+    case convert(cents_to_decimal(value), from, to) do
       {:ok, result} -> {:ok, result |> Decimal.mult(100) |> Decimal.round() |> Decimal.to_integer()}
       error -> error
     end
@@ -198,13 +198,13 @@ defmodule OpenExchangeRates do
   def conversion_rate(from, to) when is_binary(from) and is_binary(to), do: conversion_rate(String.to_atom(from), String.to_atom(to))
   def conversion_rate(from, to), do: convert(Decimal.new("1"), from, to)
 
-  defp divide_by_100(int) when is_integer(int) and int >= 0,
+  defp cents_to_decimal(int) when is_integer(int) and int >= 0,
     do: Decimal.new(1, int, -2)
 
-  defp divide_by_100(int) when is_integer(int) and int < 0,
+  defp cents_to_decimal(int) when is_integer(int) and int < 0,
     do: Decimal.new(-1, abs(int), -2)
 
-  defp divide_by_100(%Decimal{} = dec), do: Decimal.div(dec, 100)
+  defp cents_to_decimal(%Decimal{} = dec), do: Decimal.div(dec, 100)
 
   defp check_configuration do
     cond do
